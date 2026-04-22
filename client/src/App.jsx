@@ -1,39 +1,61 @@
 import React from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
-import { Route, Routes, useLocation } from 'react-router-dom'
-import Home from './pages/Home'
 import Footer from './components/Footer'
-import AllRooms from './pages/AllRooms'
-import RoomDetails from './pages/RoomDetails'
+
+// CLIENT PAGES
+import Home from './pages/Home'
+import AllServices from './pages/AllServices'
+import ServiceDetails from './pages/ServiceDetails'
+import AITripPlanner from './pages/AITripPlanner'
+import MyItineraries from './pages/MyItineraries'
 import MyBookings from './pages/MyBookings'
-import HotelReg from './components/HotelReg'
-import Layout from './pages/hotelOwner/Layout'
-import Dashboard from './pages/hotelOwner/Dashboard'
-import AddRoom from './pages/hotelOwner/AddRoom'
-import ListRoom from './pages/hotelOwner/ListRoom'
+import BecomePartner from './pages/BecomePartner'
+
+// OWNER PAGES
+import Layout from './pages/owner/Layout'
+import Dashboard from './pages/owner/Dashboard'
+import ListService from './pages/owner/ListService'
+import AddService from './pages/owner/AddService'
+import Inventory from './pages/owner/Inventory'
+import Bookings from './pages/owner/Bookings'
+import Subscription from './pages/owner/Subscription'
+import Settings from './pages/owner/Settings'
+import Invoices from './pages/owner/Invoices'
 
 const App = () => {
-
-  const isOwnerPath = useLocation().pathname.includes('/owner')
+  const isOwnerPath = useLocation().pathname.startsWith('/owner')
 
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       {!isOwnerPath && <Navbar />}
-      {false && <HotelReg />}
-      <div className='min-h-[70vh]'>
+
+      <main className={isOwnerPath ? "h-screen" : "flex-1"}>
         <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/rooms' element={<AllRooms />} />
-          <Route path='/rooms/:id' element={<RoomDetails />} />
-          <Route path='/my-bookings' element={<MyBookings />} />
-          <Route path='/owner' element={<Layout />}>
+          {/* CLIENT */}
+          <Route path="/" element={<Home />} />
+          <Route path="/services" element={<AllServices />} />
+          <Route path="/services/:id" element={<ServiceDetails />} />
+          <Route path="/ai-planner" element={<AITripPlanner />} />
+          <Route path="/my-itineraries" element={<MyItineraries />} />
+          <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/become-partner" element={<BecomePartner />} />
+
+          {/* OWNER */}
+          <Route path="/owner" element={<Layout />}>
             <Route index element={<Dashboard />} />
-            <Route path='add-room' element={<AddRoom />} />
-            <Route path='list-room' element={<ListRoom />} />
+            <Route path="list-service" element={<ListService />} />
+            <Route path="add-service" element={<AddService />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="bookings" element={<Bookings />} />
+            <Route path="subscription" element={<Subscription />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="invoices" element={<Invoices />} />
           </Route>
         </Routes>
-      </div>
-      <Footer />
+      </main>
+
+      {!isOwnerPath && <Footer />}
     </div>
   )
 }

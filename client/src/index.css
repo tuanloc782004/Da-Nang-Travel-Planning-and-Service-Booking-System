@@ -1,16 +1,21 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #2563EB;
-  --color-secondary: #FBBF24;
+  --color-primary: #004D40;
+  --color-secondary: #FFAB40;
+  --color-background: #F5F5F5;
+  --font-cormorant: "Cormorant Garamond", serif;
+  --font-jakarta: "Plus Jakarta Sans", sans-serif;
 }
 
-* {
-  font-family: Outfit;
+body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background-color: #F5F5F5;
+  background-image: url("https://www.transparenttextures.com/patterns/natural-paper.png");
 }
 
-.font-playfair {
-  font-family: Playfair !important;
+.liquid-card {
+  border-top-right-radius: 40px;
+  border-bottom-left-radius: 40px;
 }
