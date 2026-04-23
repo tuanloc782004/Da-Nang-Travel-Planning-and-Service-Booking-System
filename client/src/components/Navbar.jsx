@@ -11,10 +11,11 @@ const BookIcon = () => (
 
 const Navbar = () => {
     const navLinks = [
-        { name: 'Home', path: '/' },
-        { name: 'Hotels', path: '/rooms' },
-        { name: 'Experience', path: '/' },
-        { name: 'About', path: '/' },
+        { name: 'Trang chủ', path: '/' },
+        { name: 'Dịch vụ', path: '/rooms' },
+        { name: 'Lịch trình', path: '/' },
+        { name: 'Đặt chỗ', path: '/' },
+        { name: "Trở thành Owner", path: "/become-owner" },
     ];
 
     const [isScrolled, setIsScrolled] = useState(false);
@@ -61,11 +62,11 @@ const Navbar = () => {
                         <div className={`${isScrolled ? "bg-gray-700" : "bg-white"} h-0.5 w-0 group-hover:w-full transition-all duration-300`} />
                     </a>
                 ))}
-                <button className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${isScrolled ? 'text-black' : 'text-white'} transition-all`} onClick={() => navigate('/owner')}>
+                {/* <button className={`border px-4 py-1 text-sm font-light rounded-full cursor-pointer ${isScrolled ? 'text-black' : 'text-white'} transition-all`} onClick={() => navigate('/owner')}>
                     Dashboard
-                </button>
+                </button> */}
             </div>
-
+            
             {/* Desktop Right */}
             <div className="hidden md:flex items-center gap-4">
                 <img src={assets.searchIcon} alt="search" className={`${isScrolled && 'invert'} h-7 transition-all duration-500`} />
