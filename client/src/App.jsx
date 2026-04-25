@@ -1,16 +1,27 @@
 import React from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
-import { Route, Routes, useLocation } from 'react-router-dom'
-import Home from './pages/Home'
 import Footer from './components/Footer'
-import AllRooms from './pages/AllRooms'
-import RoomDetails from './pages/RoomDetails'
+
+// CLIENT PAGES
+import Home from './pages/Home'
+import AllServices from './pages/AllServices'
+import ServiceDetails from './pages/ServiceDetails'
+import AITripPlanner from './pages/AITripPlanner'
+import MyItineraries from './pages/MyItineraries'
 import MyBookings from './pages/MyBookings'
-import HotelReg from './components/HotelReg'
-import Layout from './pages/hotelOwner/Layout'
-import Dashboard from './pages/hotelOwner/Dashboard'
-import AddRoom from './pages/hotelOwner/AddRoom'
-import ListRoom from './pages/hotelOwner/ListRoom'
+import BecomePartner from './pages/BecomePartner'
+
+// OWNER PAGES
+import Layout from './pages/owner/Layout'
+import Dashboard from './pages/owner/Dashboard'
+import ListService from './pages/owner/ListService'
+import AddService from './pages/owner/AddService'
+import Inventory from './pages/owner/Inventory'
+import Bookings from './pages/owner/Bookings'
+import Subscription from './pages/owner/Subscription'
+import Settings from './pages/owner/Settings'
+import Invoices from './pages/owner/Invoices'
 
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -19,32 +30,37 @@ import OwnerApprovals from './pages/admin/Owners'
 import ServiceApprovals from './pages/admin/Services'
 import Packages from './pages/admin/Packages'
 import Finance from './pages/admin/Finance'
-import AdminBank from './pages/admin/AdminBank'
-import PaymentSettings from './pages/admin/Payment'
-import AdminProfile from './pages/admin/AdminProfile'
 
 const App = () => {
-
-  const isOwnerPath = useLocation().pathname.includes('/owner')
+  const isOwnerPath = useLocation().pathname.startsWith('/owner')
 
   const isAdminPath = useLocation().pathname.includes('/admin')
 
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       {!isOwnerPath && !isAdminPath && <Navbar />}
-      {false && <HotelReg />}
-      <div className='min-h-[70vh]'>
-        <Routes>
-          <Route path='/' element={<Home />} />
-          <Route path='/rooms' element={<AllRooms />} />
-          <Route path='/rooms/:id' element={<RoomDetails />} />
-          <Route path='/my-bookings' element={<MyBookings />} />
 
-          {/* Owner Routes */}
-          <Route path='/owner' element={<Layout />}>
+      <main className={isOwnerPath || isAdminPath ? "h-screen" : "flex-1"}>
+        <Routes>
+          {/* CLIENT */}
+          <Route path="/" element={<Home />} />
+          <Route path="/services" element={<AllServices />} />
+          <Route path="/services/:id" element={<ServiceDetails />} />
+          <Route path="/ai-planner" element={<AITripPlanner />} />
+          <Route path="/my-itineraries" element={<MyItineraries />} />
+          <Route path="/my-bookings" element={<MyBookings />} />
+          <Route path="/become-partner" element={<BecomePartner />} />
+
+          {/* OWNER */}
+          <Route path="/owner" element={<Layout />}>
             <Route index element={<Dashboard />} />
-            <Route path='add-room' element={<AddRoom />} />
-            <Route path='list-room' element={<ListRoom />} />
+            <Route path="list-service" element={<ListService />} />
+            <Route path="add-service" element={<AddService />} />
+            <Route path="inventory" element={<Inventory />} />
+            <Route path="bookings" element={<Bookings />} />
+            <Route path="subscription" element={<Subscription />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="invoices" element={<Invoices />} />
           </Route>
 
           {/* Admin Routes */}
@@ -55,14 +71,10 @@ const App = () => {
             <Route path='services' element={<ServiceApprovals />} />
             <Route path='packages' element={<Packages />} />
             <Route path='finance' element={<Finance />} />
-            <Route path="payment" element={<PaymentSettings />} />
-            <Route path='bank' element={<AdminBank />} />
-            <Route path='profile' element={<AdminProfile />} />
           </Route>
         </Routes>
-      </div>
+      </main>
 
-      {/* Footer */}
       {!isOwnerPath && !isAdminPath && <Footer />}
     </div>
   )

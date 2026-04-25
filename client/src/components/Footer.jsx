@@ -1,73 +1,72 @@
 import React from 'react'
-import { assets } from '../assets/assets'
+import { Link } from 'react-router-dom'
+import { Map, Phone, Mail } from 'lucide-react'
 
 const Footer = () => {
     return (
-        <div className='bg-[#F6F9FC] text-gray-500/80 pt-8 px-6 md:px-16 lg:px-24 xl:px-32'>
-            <div className='flex flex-wrap justify-between gap-12 md:gap-6'>
-                <div className='max-w-80'>
-                    <img src={assets.logo} alt="logo" className='mb-4 h-8 md:h-9 invert opacity-80' />
-                    <p className='text-sm'>
-                        Discover the world's most extraordinary places to stay, from boutique hotels to luxury villas and private islands.
+        <footer className="bg-[#004D40] text-[#E0F2F1] font-jakarta relative pt-20 pb-10 px-6 overflow-hidden">
+            {/* Đường cắt chéo tạo điểm nhấn D-PULSE */}
+            <div className="absolute top-0 left-0 w-full h-10 bg-[#F5F5F5] rounded-br-[60px] md:rounded-br-[100px] z-10"></div>
+
+            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 relative z-20">
+                {/* Logo & Intro */}
+                <div className="md:col-span-1">
+                    <span className="font-cormorant font-bold text-3xl tracking-tight text-white">D-PULSE</span>
+                    <p className="mt-4 text-sm text-[#E0F2F1]/70 leading-relaxed font-medium">
+                        Nền tảng trải nghiệm du lịch cá nhân hóa. Nhịp đập của Biển và Đá Cẩm Thạch Đà Nẵng.
                     </p>
-                    <div className='flex items-center gap-3 mt-4'>
-                        {/* Instagram */}
-                        <img src={assets.instagramIcon} alt="instagram-icon" className='w-6' />
-                        {/* Facebook */}
-                        <img src={assets.facebookIcon} alt="facebook-icon" className='w-6' />
-                        {/* Twitter */}
-                        <img src={assets.twitterIcon} alt="twitter-icon" className='w-6' />
-                        {/* LinkendIn */}
-                        <img src={assets.linkendinIcon} alt="linkendin-icon" className='w-6' />
-                    </div>
                 </div>
 
+                {/* Quick Links */}
                 <div>
-                    <p className='font-playfair text-lg text-gray-800'>COMPANY</p>
-                    <ul className='mt-3 flex flex-col gap-2 text-sm'>
-                        <li><a href="#">About</a></li>
-                        <li><a href="#">Careers</a></li>
-                        <li><a href="#">Press</a></li>
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">Partners</a></li>
+                    <h4 className="text-white font-bold mb-6 tracking-wider uppercase text-sm">Khám phá</h4>
+                    <ul className="space-y-3 text-sm font-medium text-[#E0F2F1]/70">
+                        <li><Link to="/rooms" className="hover:text-[#FFAB40] transition-colors">Khách sạn & Lưu trú</Link></li>
+                        <li><Link to="/rooms" className="hover:text-[#FFAB40] transition-colors">Ẩm thực địa phương</Link></li>
+                        <li><Link to="/rooms" className="hover:text-[#FFAB40] transition-colors">Hoạt động trải nghiệm</Link></li>
+                        <li><Link to="/ai-planner" className="hover:text-[#FFAB40] flex items-center gap-1.5 transition-colors">Lịch trình AI <span className="bg-[#FFAB40] text-white text-[9px] px-1.5 py-0.5 rounded">MỚI</span></Link></li>
                     </ul>
                 </div>
 
+                {/* Dành cho Đối tác */}
                 <div>
-                    <p className='font-playfair text-lg text-gray-800'>SUPPORT</p>
-                    <ul className='mt-3 flex flex-col gap-2 text-sm'>
-                        <li><a href="#">Help Center</a></li>
-                        <li><a href="#">Safety Information</a></li>
-                        <li><a href="#">Cancellation Options</a></li>
-                        <li><a href="#">Contact Us</a></li>
-                        <li><a href="#">Accessibility</a></li>
+                    <h4 className="text-white font-bold mb-6 tracking-wider uppercase text-sm">Đối tác</h4>
+                    <ul className="space-y-3 text-sm font-medium text-[#E0F2F1]/70">
+                        <li><Link to="/owner" className="hover:text-[#FFAB40] transition-colors">Đăng ký kinh doanh</Link></li>
+                        <li><Link to="/owner" className="hover:text-[#FFAB40] transition-colors">Kênh Quản lý (Owner)</Link></li>
+                        <li><Link to="#" className="hover:text-[#FFAB40] transition-colors">Chính sách nền tảng</Link></li>
                     </ul>
                 </div>
 
-                <div className='max-w-80'>
-                    <p className='font-playfair text-lg text-gray-800'>STAY UPDATED</p>
-                    <p className='mt-3 text-sm'>
-                        Subscribe to our newsletter for inspiration and special offers.
-                    </p>
-                    <div className='flex items-center mt-4'>
-                        <input type="text" className='bg-white rounded-l border border-gray-300 h-9 px-3 outline-none' placeholder='Your email' />
-                        <button className='flex items-center justify-center bg-black h-9 w-9 aspect-square rounded-r'>
-                            {/* Arrow icon */}
-                            <img src={assets.arrowIcon} alt="arrow-icon" className='w-3.5 invert' />
-                        </button>
-                    </div>
+                {/* Liên hệ */}
+                <div>
+                    <h4 className="text-white font-bold mb-6 tracking-wider uppercase text-sm">Liên hệ</h4>
+                    <ul className="space-y-4 text-sm font-medium text-[#E0F2F1]/70">
+                        <li className="flex items-start gap-3">
+                            <Map className="text-[#FFAB40] shrink-0" size={18} />
+                            <span>Đại học Bách Khoa, Đà Nẵng</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <Phone className="text-[#FFAB40]" size={18} />
+                            <span>0905.XXX.XXX</span>
+                        </li>
+                        <li className="flex items-center gap-3">
+                            <Mail className="text-[#FFAB40]" size={18} />
+                            <span>hello@dpulse.vn</span>
+                        </li>
+                    </ul>
                 </div>
             </div>
-            <hr className='border-gray-300 mt-8' />
-            <div className='flex flex-col md:flex-row gap-2 items-center justify-between py-5'>
-                <p>© {new Date().getFullYear()} QuickStay. All rights reserved.</p>
-                <ul className='flex items-center gap-4'>
-                    <li><a href="#">Privacy</a></li>
-                    <li><a href="#">Terms</a></li>
-                    <li><a href="#">Sitemap</a></li>
-                </ul>
+
+            {/* Bottom Bar */}
+            <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-[#E0F2F1]/50 font-bold uppercase tracking-widest relative z-20">
+                <p>© {new Date().getFullYear()} D-PULSE DANANG. All rights reserved.</p>
+                <div className="flex gap-4 font-bold">
+                    <a href="#" className="hover:text-white transition-colors">FACEBOOK</a>
+                    <a href="#" className="hover:text-white transition-colors">INSTAGRAM</a>
+                </div>
             </div>
-        </div>
+        </footer>
     )
 }
 

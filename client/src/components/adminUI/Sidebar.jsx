@@ -1,8 +1,11 @@
 import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, Settings, LogOut, Users, UserCheck, ShieldCheck, Package, Landmark } from "lucide-react";
+import { Link, NavLink } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+  Menu, Settings, LogOut, Users, UserCheck, 
+  Package, Landmark, LayoutDashboard, X 
+} from "lucide-react";
 import { assets } from "../../assets/assets";
-import { LayoutDashboard } from "lucide-react";
 
 const menuItems = [
   { title: "Bảng điều khiển", icon: <LayoutDashboard size={20} />, path: "/admin" },
@@ -14,58 +17,92 @@ const menuItems = [
 ];
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
-  const location = useLocation();
-
   return (
     <aside
-      className={`bg-[#1a1c2e] border-r border-slate-800 text-slate-300
-      flex flex-col transition-all duration-300 h-full ${
+      className={`bg-white/90 backdrop-blur-[10px] border-r border-white/50 
+      flex flex-col transition-all duration-300 h-screen sticky top-0 z-20 font-jakarta
+      shadow-[4px_0_24px_rgba(0,0,0,0.02)] ${
         isOpen ? "w-64" : "w-20"
       }`}
     >
-      {/* Logo */}
-      <div className="p-5 flex items-center justify-between">
-        {isOpen && (
-          <img src={assets.logo} alt="logo" className="h-8 opacity-90" />
-        )}
-
+      {/* Header: Logo & Toggle Button */}
+      <div className="h-24 flex flex-col items-center justify-center relative border-b border-gray-100/50 px-2">
+        {/* Nút Toggle - Đặt ở góc nếu mở, ở giữa nếu đóng */}
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="p-2 hover:bg-slate-800 rounded-lg"
+          className={`absolute top-4 p-2 hover:bg-[#E0F2F1] text-[#004D40] rounded-full transition-all duration-300 ${
+            isOpen ? "right-2" : "right-1/2 translate-x-1/2"
+          }`}
         >
-          <Menu size={22} />
+          {isOpen ? <X size={18} /> : <Menu size={22} />}
         </button>
+
+        {/* Logo - Căn giữa tuyệt đối khi mở */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ duration: 0.2 }}
+              className="mt-6"
+            >
+              <Link to="/">
+                <img 
+                  src={assets.logo} 
+                  alt="logo" 
+                  className="h-12 w-auto object-contain scale-125" 
+                />
+              </Link>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {/* Menu */}
-      <nav className="flex-1 px-3 space-y-1">
-        {menuItems.map((item) => {
-          const active = location.pathname === item.path;
-
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex items-center gap-3 px-3 py-3 rounded-lg transition
-              ${active ? "bg-indigo-600 text-white" : "hover:bg-slate-800"}`}
-            >
-              {item.icon}
-              {isOpen && <span>{item.title}</span>}
-            </Link>
-          );
-        })}
+      {/* Navigation Menu */}
+      <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
+        {menuItems.map((item, index) => (
+          <NavLink
+            key={index}
+            to={item.path}
+            end={item.path === "/admin"}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-3 py-3 transition-all duration-300 group ${
+                isActive
+                  ? "bg-[#004D40] text-white rounded-tr-[24px] rounded-bl-[24px] rounded-tl-md rounded-br-md shadow-lg shadow-[#004D40]/20 font-bold"
+                  : "text-gray-500 hover:bg-[#E0F2F1] hover:text-[#004D40] rounded-tr-[16px] rounded-bl-[16px] rounded-tl-sm rounded-br-sm font-medium"
+              } ${!isOpen ? "justify-center px-0" : ""}`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                <motion.div
+                  animate={{ scale: isActive ? 1.1 : 1 }}
+                  className={isActive ? "text-[#FFAB40]" : ""}
+                >
+                  {item.icon}
+                </motion.div>
+                
+                {isOpen && (
+                  <motion.span
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="text-sm whitespace-nowrap"
+                  >
+                    {item.title}
+                  </motion.span>
+                )}
+              </>
+            )}
+          </NavLink>
+        ))}
       </nav>
 
-      {/* Footer */}
-      <div className="p-3 border-t border-slate-800 space-y-1">
-        <button className="flex items-center gap-3 w-full px-3 py-3 hover:bg-slate-800 rounded-lg">
-          <Settings size={18} />
-          {isOpen && "Cài đặt"}
-        </button>
-
-        <button className="flex items-center gap-3 w-full px-3 py-3 text-red-400 hover:bg-red-500/10 rounded-lg">
-          <LogOut size={18} />
-          {isOpen && "Đăng xuất"}
+      {/* Footer Section */}
+      <div className="p-3 border-t border-gray-100 space-y-1 bg-gray-50/50">
+        <button className={`flex items-center gap-3 w-full px-3 py-3 text-red-500 hover:bg-red-50 transition-all rounded-xl font-medium ${!isOpen ? "justify-center" : ""}`}>
+          <LogOut size={20} />
+          {isOpen && <span className="text-sm">Đăng xuất</span>}
         </button>
       </div>
     </aside>
