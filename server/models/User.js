@@ -1,28 +1,28 @@
 import mongoose from 'mongoose';
 
-const UserSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     clerkId: {
       type: String,
-      required: true,
+      required: [true, 'Clerk ID là bắt buộc'],
       unique: true,
       index: true,
     },
     email: {
       type: String,
-      required: true,
+      required: [true, 'Email là bắt buộc'],
       unique: true,
       lowercase: true,
       trim: true,
+      match: [/^\S+@\S+\.\S+$/, 'Email không hợp lệ']
     },
     fullName: {
       type: String,
-      required: true,
+      required: [true, 'Tên người dùng là bắt buộc'],
       trim: true,
     },
     role: {
-      type: String,
-      enum: ['USER', 'OWNER', 'ADMIN'],
+      type: String,      enum: ['USER', 'OWNER', 'ADMIN'],
       default: 'USER',
     },
     status: {
@@ -30,13 +30,16 @@ const UserSchema = new mongoose.Schema(
       enum: ['ACTIVE', 'BLOCKED'],
       default: 'ACTIVE',
     },
-    preferences: [{
-      type: String,
-    }],
+    preferences: {
+      type: [String],
+      default: [],
+    },
   },
   {
     timestamps: true,
   }
 );
 
-export default mongoose.model('User', UserSchema);
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+
+export default User;

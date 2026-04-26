@@ -1,3 +1,8 @@
+import dns from 'node:dns';
+dns.setServers(['1.1.1.1', '1.0.0.1']);
+
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -5,12 +10,13 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import ownerApplicationRoutes from './routes/ownerApplicationRoutes.js';
 
-dotenv.config();
-
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.CLIENT_URL || 'http://localhost:5173', 
+  credentials: true
+}));
 app.use(express.json());
 
 // Database Connection

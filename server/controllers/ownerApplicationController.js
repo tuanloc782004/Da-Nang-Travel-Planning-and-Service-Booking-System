@@ -1,5 +1,6 @@
 import OwnerApplication from '../models/OwnerApplication.js';
 import User from '../models/User.js';
+import clerkClient from '../utils/clerkClient.js';
 
 // @desc    Submit owner application
 // @route   POST /api/owner-applications
@@ -100,7 +101,22 @@ export const reviewApplication = async (req, res) => {
 
     // If approved, update user role to OWNER
     if (status === 'APPROVED') {
-      await User.findByIdAndUpdate(application.userId, { role: 'OWNER' });
+      // 1. Cập nhật Role trong MongoDB của bạn
+      const updatedUser = await User.findByIdAndUpdate(
+        application.userId, 
+        { role: 'OWNER' },
+        { new: true } // Trả về user sau khi đã update
+      );
+
+      // 2. Cập nhật Metadata sang Clerk để Frontend nhận diện ngay lập tức
+      if (updatedUser && updatedUser.clerkId) {
+        await clerkClient.users.updateUserMetadata(updatedUser.clerkId, {
+          publicMetadata: {
+            role: 'OWNER'
+          }
+        });
+        console.log(`🚀 Đã đồng bộ role OWNER cho user: ${updatedUser.email}`);
+      }
     }
 
     res.json({

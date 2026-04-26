@@ -1,10 +1,9 @@
 import express from 'express';
-import { getMe, syncUser } from '../controllers/authController.js';
+import { syncUser } from '../controllers/authController.js';
 import { verifyClerkToken } from '../middlewares/auth.js';
 
 const router = express.Router();
 
-router.get('/me', verifyClerkToken, getMe);
-router.post('/sync', syncUser);
+router.post('/sync', verifyClerkToken, syncUser);
 
 export default router;

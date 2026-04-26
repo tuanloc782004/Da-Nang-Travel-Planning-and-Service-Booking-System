@@ -1,7 +1,10 @@
-import { Clerk } from '@clerk/clerk-sdk-node';
+import { createClerkClient } from '@clerk/clerk-sdk-node';
+import dotenv from 'dotenv';
+dotenv.config();
 
-const clerkClient = Clerk({
-  apiKey: process.env.CLERK_SECRET_KEY,
+const clerkClient = createClerkClient({
+  secretKey: process.env.CLERK_SECRET_KEY,
+  publishableKey: process.env.CLERK_PUBLISHABLE_KEY,
 });
 
 export default clerkClient;

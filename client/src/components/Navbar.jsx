@@ -1,5 +1,5 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { UserButton, useUser, SignInButton } from "@clerk/clerk-react";
 import {
   Sparkles,
@@ -10,10 +10,13 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 
-const Navbar = () => {
-  const { user, isSignedIn } = useUser();
-  const navigate = useNavigate();
-  const userRole = user?.publicMetadata?.role || "USER";
+const Navbar = ({ user: dbUser }) => {
+  const { isSignedIn, isLoaded } = useUser();
+  const userRole = dbUser?.role || 'USER';
+
+  if (!isLoaded) {
+    return <header className="h-[64px] bg-white/70" />;
+  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/70 backdrop-blur-xl border-b border-white/50 py-3 shadow-sm">
@@ -46,24 +49,33 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           {isSignedIn ? (
             <div className="flex items-center gap-4">
-              {userRole === "USER" && (
-                <Link
-                  to="/become-partner"
-                  className="hidden md:flex items-center gap-2 text-xs font-black uppercase text-[#004D40] border border-[#004D40]/10 px-4 py-2 rounded-tr-xl rounded-bl-xl hover:bg-[#004D40] hover:text-white transition-all"
-                >
-                  <Store size={14} /> Đối tác
-                </Link>
-              )}
-              {userRole === "OWNER" && (
-                <Link
-                  to="/owner"
-                  className="bg-[#004D40] text-[#FFAB40] px-4 py-2 rounded-tr-xl rounded-bl-xl text-[10px] font-black tracking-widest shadow-lg flex items-center gap-2"
-                >
-                  <LayoutDashboard size={14} /> KÊNH QUẢN LÝ
-                </Link>
-              )}
+                  {userRole === "USER" && (
+                    <Link
+                      to="/become-partner"
+                      className="hidden md:flex items-center gap-2 text-xs font-black uppercase text-[#004D40] border border-[#004D40]/10 px-4 py-2 rounded-tr-xl rounded-bl-xl hover:bg-[#004D40] hover:text-white transition-all"
+                    >
+                      <Store size={14} /> Đối tác
+                    </Link>
+                  )}
+                  
+                  {userRole === "OWNER" && (
+                    <Link
+                      to="/owner"
+                      className="bg-[#004D40] text-[#FFAB40] px-4 py-2 rounded-tr-xl rounded-bl-xl text-[10px] font-black tracking-widest shadow-lg flex items-center gap-2"
+                    >
+                      <LayoutDashboard size={14} /> KÊNH QUẢN LÝ
+                    </Link>
+                  )}
+                  
+                  {userRole === "ADMIN" && (
+                    <Link
+                      to="/admin"
+                      className="bg-[#FF5252] text-white px-4 py-2 rounded-tr-xl rounded-bl-xl text-[10px] font-black tracking-widest shadow-lg flex items-center gap-2"
+                    >
+                      <LayoutDashboard size={14} /> ADMIN DASHBOARD
+                    </Link>
+                  )}
 
-              {/* CUSTOM CLERK USER BUTTON */}
               <UserButton afterSignOutUrl="/">
                 <UserButton.MenuItems>
                   <UserButton.Link
@@ -80,7 +92,7 @@ const Navbar = () => {
               </UserButton>
             </div>
           ) : (
-            <SignInButton mode="modal">
+            <SignInButton mode="redirect" redirectUrl="/login">
               <button className="bg-[#FFAB40] text-white px-6 py-2 rounded-tr-xl rounded-bl-xl font-bold text-sm shadow-lg shadow-[#FFAB40]/20">
                 Đăng nhập
               </button>
