@@ -10,8 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@clerk/react": "^6.0.1",
+    "@clerk/clerk-react": "^5.61.6",
     "@tailwindcss/vite": "^4.2.1",
+    "axios": "^1.15.2",
     "framer-motion": "^12.38.0",
     "lucide-react": "^1.8.0",
     "react": "^19.2.0",
@@ -27,10 +28,13 @@
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "autoprefixer": "^10.5.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "postcss": "^8.5.10",
+    "tailwindcss": "^4.2.2",
     "vite": "^7.3.1"
   }
 }

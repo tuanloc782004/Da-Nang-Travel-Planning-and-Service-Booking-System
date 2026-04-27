@@ -1,5 +1,5 @@
 import React from 'react'
-import { UserButton, useUser } from '@clerk/react'
+import { UserButton, useUser } from '@clerk/clerk-react'
 import { Link } from 'react-router-dom'
 import { Bell } from 'lucide-react'
 import { motion } from 'framer-motion'

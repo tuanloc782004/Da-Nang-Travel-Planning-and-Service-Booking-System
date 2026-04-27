@@ -1,10 +1,22 @@
-import React from 'react'
+import React, { useState} from 'react'
 import { motion } from 'framer-motion'
 import { Search, MapPin, Calendar, Utensils, Bed, Ticket, ArrowRight, Star, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useUser } from "@clerk/clerk-react";
+import LoginPrompt from "../components/LoginPrompt";
 
-const Home = () => {
+const Home = ( { dbUser } ) => {
     const navigate = useNavigate()
+    const { isSignedIn } = useUser();
+    const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+
+    const handleAIPlannerClick = () => {
+        if (!isSignedIn) {
+            setShowLoginPrompt(true);
+        }   else {
+            navigate("/ai-planner");
+        }
+    };
 
     // Mock dữ liệu đa dạng theo Database Schema
     const trendingServices = [
@@ -21,6 +33,12 @@ const Home = () => {
 
     return (
         <div className="bg-[#F5F5F5] min-h-screen font-jakarta">
+
+            {isSignedIn && dbUser && (
+                <div className="absolute top-24 left-6 z-30 bg-white/20 backdrop-blur-md px-4 py-2 rounded-full border border-white/30 text-white text-xs font-bold">
+                    Chào mừng trở lại, {dbUser.fullName || "bạn đồng hành"}! ✨
+                </div>
+            )}
 
             {/* HERO PULSE SECTION */}
             <section className="relative h-[90vh] flex items-center justify-center overflow-hidden">
@@ -108,7 +126,7 @@ const Home = () => {
                             Để Gemini AI của D-Pulse sắp xếp kỳ nghỉ hoàn hảo tại Đà Nẵng dựa trên ngân sách và sở thích của bạn.
                         </p>
                         <button
-                            onClick={() => navigate('/ai-planner')}
+                            onClick={handleAIPlannerClick}
                             className="mt-10 bg-[#FFAB40] text-white px-8 py-4 rounded-tr-2xl rounded-bl-2xl font-bold flex items-center gap-3 hover:bg-[#e09635] transition-all shadow-lg shadow-[#FFAB40]/20 uppercase text-sm tracking-widest"
                         >
                             Bắt đầu ngay <ArrowRight size={18} />
@@ -127,6 +145,12 @@ const Home = () => {
                     </div>
                 </div>
             </section>
+            {/* Login Prompt Modal */}
+            <LoginPrompt
+                isOpen={showLoginPrompt}
+                onClose={() => setShowLoginPrompt(false)}
+                message="Đăng nhập để sử dụng AI Trip Planner và tạo lịch trình du lịch thông minh cho riêng bạn!"
+            />
         </div>
     )
 }
