@@ -21,7 +21,8 @@ const OwnerDetailModal = ({
   getStatusBadge,
 }) => {
   if (!application) return null;
-
+  const badge = getStatusBadge(application.status) || {};
+  
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <motion.div
@@ -37,7 +38,7 @@ const OwnerDetailModal = ({
               Hồ sơ đăng ký Owner
             </h2>
             <p className="text-sm text-[#004D40]/60 mt-1">
-              Mã đơn: <span className="font-bold">{application.id}</span>
+              Mã đơn: <span className="font-bold">{application._id?.slice(-8).toUpperCase()}</span>
             </p>
           </div>
           <button
@@ -63,7 +64,7 @@ const OwnerDetailModal = ({
                     Họ và tên
                   </label>
                   <p className="text-base font-bold text-[#004D40]">
-                    {application.user}
+                    {application.userId?.fullName}
                   </p>
                 </div>
                 <div>
@@ -73,7 +74,7 @@ const OwnerDetailModal = ({
                   <div className="flex items-center gap-2">
                     <Mail size={14} className="text-[#004D40]/60" />
                     <p className="text-sm text-[#004D40]">
-                      {application.email || "-"}
+                      {application.userId?.email || "-"}
                     </p>
                   </div>
                 </div>
@@ -83,7 +84,7 @@ const OwnerDetailModal = ({
                   </label>
                   <div className="flex items-center gap-2">
                     <Phone size={14} className="text-[#004D40]/60" />
-                    <p className="text-sm text-[#004D40]">{application.phone}</p>
+                    <p className="text-sm text-[#004D40]">{application.phoneNumber}</p>
                   </div>
                 </div>
                 <div>
@@ -92,12 +93,10 @@ const OwnerDetailModal = ({
                   </label>
                   <span
                     className={`inline-block px-3 py-1.5 rounded-full text-xs font-bold border ${
-                      getStatusBadge(application.status).bg
-                    } ${getStatusBadge(application.status).text} ${
-                      getStatusBadge(application.status).border
-                    }`}
+                    badge.bg
+                    } ${badge.text} ${badge.border}`}
                   >
-                    {getStatusBadge(application.status).label}
+                  {badge.label}
                   </span>
                 </div>
               </div>
@@ -123,7 +122,7 @@ const OwnerDetailModal = ({
                   </label>
                   <div className="flex items-start gap-2">
                     <MapPin size={14} className="text-red-500 mt-0.5" />
-                    <p className="text-sm text-[#004D40]">{application.address}</p>
+                    <p className="text-sm text-[#004D40]">{application.businessAddress}</p>
                   </div>
                 </div>
                 <div>
@@ -132,7 +131,7 @@ const OwnerDetailModal = ({
                   </label>
                   <div className="flex items-center gap-2">
                     <Calendar size={14} className="text-[#004D40]/60" />
-                    <p className="text-sm text-[#004D40]">{application.date}</p>
+                    <p className="text-sm text-[#004D40]">{new Date(application.createdAt).toLocaleDateString('vi-VN')}</p>
                   </div>
                 </div>
               </div>
@@ -151,7 +150,7 @@ const OwnerDetailModal = ({
                   <div>
                     <p className="text-xs text-[#004D40]/60">Ngân hàng</p>
                     <p className="text-sm font-bold text-[#004D40]">
-                      {application.bank.name}
+                      {application.bankAccount?.bankName}
                     </p>
                   </div>
                 </div>
@@ -160,7 +159,7 @@ const OwnerDetailModal = ({
                     Tên tài khoản
                   </label>
                   <p className="text-sm text-[#004D40]">
-                    {application.bank.accountName}
+                    {application.bankAccount?.accountHolderName}
                   </p>
                 </div>
                 <div>
@@ -168,7 +167,7 @@ const OwnerDetailModal = ({
                     Số tài khoản
                   </label>
                   <p className="text-sm font-mono text-[#004D40]">
-                    {application.bank.number}
+                    {application.bankAccount?.accountNumber}
                   </p>
                 </div>
               </div>
@@ -198,8 +197,7 @@ const OwnerDetailModal = ({
                 CCCD / CMND
               </h3>
               <div className="grid grid-cols-2 gap-4">
-                {application.docs
-                  .filter((d) => d.type === "CCCD")
+                {(application.documents || []).filter((d) => d.type === "CCCD")
                   .map((doc, i) => (
                     <div key={i}>
                       <p className="text-xs font-bold text-[#004D40]/70 mb-2">
@@ -221,14 +219,14 @@ const OwnerDetailModal = ({
             </div>
 
             {/* Giấy phép kinh doanh */}
-            {application.docs.filter((d) => d.type === "BUSINESS_LICENSE").length >
+            {(application.documents || []).filter((d) => d.type === "BUSINESS_LICENSE").length >
               0 && (
               <div className="bg-white/80 backdrop-blur-[10px] p-6 rounded-tr-[40px] rounded-bl-[40px] rounded-tl-2xl rounded-br-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60">
                 <h3 className="text-xl font-cormorant font-bold text-[#004D40] border-b border-[#004D40]/10 pb-3 mb-5">
                   Giấy phép kinh doanh
                 </h3>
                 <div className="space-y-4">
-                  {application.docs
+                  {application.documents
                     .filter((d) => d.type === "BUSINESS_LICENSE")
                     .map((doc, i) => (
                       <div key={i}>
@@ -257,14 +255,14 @@ const OwnerDetailModal = ({
             )}
 
             {/* Ảnh dịch vụ */}
-            {application.docs.filter((d) => d.type === "SERVICE_IMAGE").length >
+            {(application.documents || []).filter((d) => d.type === "SERVICE_IMAGE").length >
               0 && (
               <div className="bg-white/80 backdrop-blur-[10px] p-6 rounded-tr-[40px] rounded-bl-[40px] rounded-tl-2xl rounded-br-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60">
                 <h3 className="text-xl font-cormorant font-bold text-[#004D40] border-b border-[#004D40]/10 pb-3 mb-5">
                   Ảnh dịch vụ
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-                  {application.docs
+                  {application.documents
                     .filter((d) => d.type === "SERVICE_IMAGE")
                     .map((doc, i) => (
                       <div key={i}>

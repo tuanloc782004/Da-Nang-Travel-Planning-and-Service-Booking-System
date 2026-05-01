@@ -2,7 +2,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { CheckCircle } from "lucide-react";
 
-const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, userName }) => {
+const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message }) => {
   if (!isOpen) return null;
 
   return (
@@ -19,15 +19,6 @@ const ConfirmModal = ({ isOpen, onClose, onConfirm, title, message, userName }) 
         <h3 className="text-2xl font-cormorant font-bold text-[#004D40] mb-2">
           {title}
         </h3>
-        <p className="text-[#004D40]/60 text-sm mb-6">
-          {message}
-          {userName && (
-            <>
-              {" "}
-              <strong>{userName}</strong>
-            </>
-          )}
-        </p>
         <div className="flex gap-4">
           <button
             onClick={onClose}

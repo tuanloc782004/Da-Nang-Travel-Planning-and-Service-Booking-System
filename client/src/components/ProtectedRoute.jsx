@@ -41,31 +41,22 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
 
   if (!isSignedIn) return null;
 
-  if (allowedRoles.length > 0 && !allowedRoles.includes(userRole)) {
+  const hasAccess = allowedRoles.length === 0 || allowedRoles.includes(userRole);
+
+  if (!hasAccess) {
     return (
       <div className="min-h-screen bg-[#F5F5F5] flex items-center justify-center p-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white/80 backdrop-blur-[10px] p-12 rounded-tr-[40px] rounded-bl-[40px] rounded-tl-2xl rounded-br-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 text-center max-w-md"
-        >
-          <div className="w-16 h-16 bg-[#FF5252]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Lock className="text-[#FF5252]" size={32} />
-          </div>
-          <h2 className="text-2xl font-cormorant font-bold text-[#004D40] mb-4">
-            Khu vực hạn chế
-          </h2>
+        <motion.div className="bg-white p-12 rounded-2xl shadow-xl text-center max-w-md">
+          <Lock className="text-[#FF5252] mx-auto mb-6" size={48} />
+          <h2 className="text-2xl font-bold text-[#004D40] mb-4">Hạn chế truy cập</h2>
           <p className="text-[#004D40]/60 mb-6">
-            Trang này chỉ dành cho <strong>{allowedRoles.join(", ")}</strong>.
-            {userRole === "ADMIN"
-              ? " Với tư cách là Admin, bạn vui lòng quản lý thông qua Admin Dashboard."
-              : " Bạn không có quyền truy cập vào mục này."}
+            Bạn không có quyền truy cập vào khu vực này.
           </p>
           <button
-            onClick={() => navigate(userRole === "ADMIN" ? "/admin" : "/")}
-            className="bg-[#004D40] text-white px-6 py-3 rounded-tr-xl rounded-bl-xl rounded-tl-md rounded-br-md font-bold hover:bg-[#00332A] transition-colors"
+            onClick={() => navigate("/")}
+            className="bg-[#004D40] text-white px-6 py-2 rounded-lg"
           >
-            {userRole === "ADMIN" ? "Về Admin Dashboard" : "Về trang chủ"}
+            Về trang chủ
           </button>
         </motion.div>
       </div>

@@ -8,9 +8,11 @@ import {
   Mail,
   Phone,
   Calendar,
+  Loader2,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import mockApplications from "./mockdatas/mockApplications";
+import { useAuth } from "@clerk/clerk-react";
+import axios from "axios";
 import EmptyState from "./common/Empty";
 import Pagination from "./common/Pagination";
 import ConfirmModal from "./modals/ConfirmModal";
@@ -19,6 +21,9 @@ import ImageZoomModal from "./modals/ImageZoomModal";
 import OwnerDetailModal from "./modals/OwnerDetailModal";
 
 const Owners = () => {
+  const { getToken } = useAuth();
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [selected, setSelected] = useState(null);
@@ -28,21 +33,77 @@ const Owners = () => {
   const [showReject, setShowReject] = useState(false);
   const pageSize = 5;
 
+  // 1. Hàm lấy danh sách từ Backend
+  const fetchApplications = async () => {
+    setLoading(true);
+    try {
+      const token = await getToken();
+      const res = await axios.get("/api/owner-applications", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setApplications(res.data.data || []);
+    } catch (error) {
+      console.error("Lỗi lấy danh sách hồ sơ:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchApplications();
+  }, [getToken]);
+
+  // 2. Hàm Phê duyệt
+  const handleApprove = async () => {
+    try {
+      const token = await getToken();
+      await axios.patch(`/api/owner-applications/${selected._id}`, 
+        { status: "APPROVED" }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Đã phê duyệt đối tác thành công!");
+      fetchApplications(); // Load lại danh sách
+    } catch (error) {
+      alert(error.response?.data?.message || "Lỗi khi phê duyệt");
+    } finally {
+      setShowConfirm(false);
+      setSelected(null);
+    }
+  };
+
+  // 3. Hàm Từ chối
+  const handleReject = async (reason) => {
+    if (!reason) return alert("Vui lòng nhập lý do từ chối");
+    try {
+      const token = await getToken();
+      await axios.patch(`/api/owner-applications/${selected._id}`, 
+        { status: "REJECTED", adminNotes: reason }, 
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert(" Đã từ chối hồ sơ.");
+      fetchApplications();
+    } catch (error) {
+      alert("Lỗi khi từ chối hồ sơ");
+    } finally {
+      setShowReject(false);
+      setSelected(null);
+    }
+  };
+
   // FILTER
   const filtered = useMemo(() => {
     const keyword = search.toLowerCase();
 
-    return mockApplications.filter((app) => {
+    return applications.filter((app) => {
       const matchSearch =
-        app.user.toLowerCase().includes(keyword) ||
-        app.businessName.toLowerCase().includes(keyword) ||
-        app.address.toLowerCase().includes(keyword);
-
+        app.businessName?.toLowerCase().includes(keyword) ||
+        app.businessAddress?.toLowerCase().includes(keyword) ||
+        app.phoneNumber?.includes(keyword);
       const matchStatus = statusFilter === "ALL" || app.status === statusFilter;
 
       return matchSearch && matchStatus;
     });
-  }, [search, statusFilter]);
+  }, [search, statusFilter, applications]);
 
   // PAGINATION
   const totalPages = Math.ceil(filtered.length / pageSize);
@@ -81,17 +142,11 @@ const Owners = () => {
     }
   };
 
-  const handleApprove = () => {
-    console.log("Phê duyệt:", selected.id);
-    setShowConfirm(false);
-    setSelected(null);
-  };
-
-  const handleReject = (reason) => {
-    console.log("Từ chối:", selected.id, "Lý do:", reason);
-    setShowReject(false);
-    setSelected(null);
-  };
+  if (loading) return (
+    <div className="h-96 flex items-center justify-center">
+      <Loader2 className="animate-spin text-[#004D40]" size={40} />
+    </div>
+  );
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 font-jakarta pb-10">
@@ -167,14 +222,14 @@ const Owners = () => {
                   const statusBadge = getStatusBadge(app.status);
                   return (
                     <motion.tr
-                      key={app.id}
+                      key={app._id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.05 }}
                       className="hover:bg-[#E0F2F1]/40 transition"
                     >
                       <td className="px-6 py-4 font-bold text-[#004D40]">
-                        {app.user}
+                        {app.userId?.fullName}
                       </td>
 
                       <td className="px-6 py-4">
@@ -188,7 +243,7 @@ const Owners = () => {
                         <div className="space-y-1">
                           <div className="flex items-center gap-1.5 text-xs text-[#004D40]/70">
                             <Phone size={12} />
-                            {app.phone}
+                            {app.phoneNumber}
                           </div>
                           {app.email && (
                             <div className="flex items-center gap-1.5 text-xs text-[#004D40]/70">
@@ -202,7 +257,7 @@ const Owners = () => {
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-1.5 text-xs text-[#004D40]/70">
                           <Calendar size={12} />
-                          {app.date}
+                          {new Date(app.createdAt).toLocaleDateString('vi-VN')}
                         </div>
                       </td>
 
@@ -210,7 +265,7 @@ const Owners = () => {
                         <span
                           className={`px-3 py-1.5 rounded-full text-xs font-bold border ${statusBadge.bg} ${statusBadge.text} ${statusBadge.border}`}
                         >
-                          {statusBadge.label}
+                          {getStatusBadge(app.status).label}
                         </span>
                       </td>
 
@@ -296,15 +351,14 @@ const Owners = () => {
         onClose={() => setShowConfirm(false)}
         onConfirm={handleApprove}
         title="Xác nhận phê duyệt?"
-        message="Đơn đăng ký của"
-        userName={selected?.user}
+        message={`Bạn có chắc chắn muốn phê duyệt cho ${selected?.businessName}?`}
       />
 
       <RejectModal
         isOpen={showReject}
         onClose={() => setShowReject(false)}
         onReject={handleReject}
-        placeholder="VD: Giấy tờ không đầy đủ, thông tin không chính xác..."
+        placeholder={`VD: Giấy tờ không đầy đủ, thông tin không chính xác...`}
       />
 
       <ImageZoomModal image={zoomImg} onClose={() => setZoomImg(null)} />

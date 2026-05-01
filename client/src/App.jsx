@@ -33,7 +33,7 @@ import Invoices from "./pages/owner/Invoices";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import UserManagement from "./pages/admin/Users";
-import OwnerApprovals from "./pages/admin/Owners";
+import Owners from "./pages/admin/Owners";
 import ServiceApprovals from "./pages/admin/Services";
 import Packages from "./pages/admin/Packages";
 import Finance from "./pages/admin/Finance";
@@ -70,7 +70,7 @@ const App = () => {
           <Route
             path="/ai-planner"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["USER", "OWNER", "ADMIN"]}>
                 <AITripPlanner />
               </ProtectedRoute>
             }
@@ -78,7 +78,7 @@ const App = () => {
           <Route
             path="/my-itineraries"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["USER", "OWNER", "ADMIN"]}>
                 <MyItineraries />
               </ProtectedRoute>
             }
@@ -86,7 +86,7 @@ const App = () => {
           <Route
             path="/my-bookings"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRoles={["USER", "OWNER", "ADMIN"]}>
                 <MyBookings />
               </ProtectedRoute>
             }
@@ -94,8 +94,8 @@ const App = () => {
           <Route
             path="/become-partner"
             element={
-              <ProtectedRoute allowedRoles={["USER"]}>
-                <BecomePartner />
+              <ProtectedRoute allowedRoles={["USER", "OWNER", "ADMIN"]}>
+                <BecomePartner dbUser={dbUser} />
               </ProtectedRoute>
             }
           />
@@ -130,7 +130,7 @@ const App = () => {
           >
             <Route index element={<AdminDashboard />} />
             <Route path="users" element={<UserManagement />} />
-            <Route path="owners" element={<OwnerApprovals />} />
+            <Route path="owners" element={<Owners />} />
             <Route path="services" element={<ServiceApprovals />} />
             <Route path="packages" element={<Packages />} />
             <Route path="finance" element={<Finance />} />
