@@ -1,24 +1,78 @@
-import OwnerApplication from '../models/OwnerApplication.js';
-import User from '../models/User.js';
-import clerkClient from '../utils/clerkClient.js';
+import OwnerApplication from "../models/OwnerApplication.js";
+import User from "../models/User.js";
+import clerkClient from "../utils/clerkClient.js";
+
+// @desc    Upload documents for owner application
+// @route   POST /api/owner-applications/upload
+// @access  Private
+export const uploadDocuments = async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Không có file nào được tải lên",
+      });
+    }
+
+    const metadata = JSON.parse(req.body.metadata || "[]");
+
+    // Map files với metadata
+    const documents = req.files.map((file, index) => {
+      if (!file.mimetype.startsWith("image/")) {
+        throw new Error("Chỉ cho phép upload file ảnh");
+      }
+      const meta = metadata[index] || {};
+      return {
+        type: meta.type || "SERVICE_IMAGE",
+        url: file.path, // Cloudinary URL
+        publicId: file.filename,
+        title: meta.title || file.originalname,
+        description: meta.description || "",
+      };
+    });
+
+    res.json({
+      success: true,
+      data: documents,
+      message: `Đã tải lên ${documents.length} tài liệu`,
+    });
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 
 // @desc    Submit owner application
 // @route   POST /api/owner-applications
 // @access  Private
 export const submitApplication = async (req, res) => {
   try {
-    const { businessName, businessAddress, phoneNumber, bankAccount, documents } = req.body;
+    const {
+      businessName,
+      businessAddress,
+      phoneNumber,
+      bankAccount,
+      documents,
+    } = req.body;
 
-    // Check if user already has a pending/approved application
-    const existingApp = await OwnerApplication.findOne({
-      userId: req.user._id,
-      status: { $in: ['PENDING', 'APPROVED'] },
-    });
-
-    if (existingApp) {
+    if (!businessName || !phoneNumber || !bankAccount?.accountNumber) {
       return res.status(400).json({
         success: false,
-        message: 'You already have a pending or approved application',
+        message: "Thiếu thông tin bắt buộc",
+      });
+    }
+
+    const existingApp = await OwnerApplication.findOne({
+      userId: req.user._id,
+    }).sort({ createdAt: -1 });
+
+    if (existingApp && existingApp.status === "PENDING") {
+      return res.status(400).json({
+        success: false,
+        message: "Bạn đã có đơn đang chờ duyệt.",
       });
     }
 
@@ -34,12 +88,13 @@ export const submitApplication = async (req, res) => {
     res.status(201).json({
       success: true,
       data: application,
-      message: 'Application submitted successfully',
+      message: "Đơn đăng ký đã được gửi thành công",
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    console.error("Submit application error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };
@@ -50,11 +105,9 @@ export const submitApplication = async (req, res) => {
 export const getAllApplications = async (req, res) => {
   try {
     const { status } = req.query;
-    
     const filter = status ? { status } : {};
-    
     const applications = await OwnerApplication.find(filter)
-      .populate('userId', 'fullName email')
+      .populate("userId", "fullName email clerkId")
       .sort({ createdAt: -1 });
 
     res.json({
@@ -63,9 +116,10 @@ export const getAllApplications = async (req, res) => {
       data: applications,
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    console.error("Get applications error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };
@@ -76,59 +130,53 @@ export const getAllApplications = async (req, res) => {
 export const reviewApplication = async (req, res) => {
   try {
     const { status, adminNotes } = req.body;
+    const { id } = req.params;
 
-    if (!['APPROVED', 'REJECTED'].includes(status)) {
+    if (!["APPROVED", "REJECTED"].includes(status)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid status',
+        message: "Trạng thái không hợp lệ",
       });
     }
 
-    const application = await OwnerApplication.findById(req.params.id);
+    const application = await OwnerApplication.findByIdAndUpdate(
+      id,
+      { status, adminNotes, reviewedAt: Date.now() },
+      { new: true },
+    ).populate("userId", "fullName email clerkId");
 
     if (!application) {
       return res.status(404).json({
         success: false,
-        message: 'Application not found',
+        message: "Không tìm thấy đơn",
       });
     }
 
-    application.status = status;
-    application.adminNotes = adminNotes;
-    application.reviewedAt = Date.now();
+    // Nếu APPROVED -> Nâng cấp User
+    if (status === "APPROVED") {
+      const user = await User.findById(application.userId);
+      if (user && user.role !== "ADMIN") {
+        user.role = "OWNER";
+        await user.save();
 
-    await application.save();
-
-    // If approved, update user role to OWNER
-    if (status === 'APPROVED') {
-      // 1. Cập nhật Role trong MongoDB của bạn
-      const updatedUser = await User.findByIdAndUpdate(
-        application.userId, 
-        { role: 'OWNER' },
-        { new: true } // Trả về user sau khi đã update
-      );
-
-      // 2. Cập nhật Metadata sang Clerk để Frontend nhận diện ngay lập tức
-      if (updatedUser && updatedUser.clerkId) {
-        await clerkClient.users.updateUserMetadata(updatedUser.clerkId, {
-          publicMetadata: {
-            role: 'OWNER'
-          }
-        });
-        console.log(`🚀 Đã đồng bộ role OWNER cho user: ${updatedUser.email}`);
+        try {
+          await clerkClient.users.updateUserMetadata(user.clerkId, {
+            publicMetadata: { role: "OWNER" },
+          });
+          console.log(`✅ Đã nâng cấp ${user.email} lên OWNER`);
+        } catch (err) {
+          console.error("Clerk Sync Error:", err.message);
+        }
       }
     }
 
     res.json({
       success: true,
+      message: `Đã ${status === "APPROVED" ? "duyệt" : "từ chối"} đơn đăng ký`,
       data: application,
-      message: `Application ${status.toLowerCase()} successfully`,
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -137,8 +185,8 @@ export const reviewApplication = async (req, res) => {
 // @access  Private
 export const getMyApplicationStatus = async (req, res) => {
   try {
-    const application = await OwnerApplication.findOne({ 
-      userId: req.user._id 
+    const application = await OwnerApplication.findOne({
+      userId: req.user._id,
     }).sort({ createdAt: -1 });
 
     res.json({
@@ -146,9 +194,57 @@ export const getMyApplicationStatus = async (req, res) => {
       data: application,
     });
   } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: error.message 
+    console.error("Get my status error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// @desc    Delete/Cancel application
+// @route   DELETE /api/owner-applications/:id
+// @access  Private
+export const cancelApplication = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const application = await OwnerApplication.findById(id);
+
+    if (!application) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy đơn đăng ký",
+      });
+    }
+
+    // Chỉ cho phép user tự hủy đơn của mình
+    if (application.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({
+        success: false,
+        message: "Bạn không có quyền hủy đơn này",
+      });
+    }
+
+    // Chỉ cho phép hủy đơn PENDING
+    if (application.status !== "PENDING") {
+      return res.status(400).json({
+        success: false,
+        message: "Chỉ có thể hủy đơn đang chờ duyệt",
+      });
+    }
+
+    await application.deleteOne();
+
+    res.json({
+      success: true,
+      message: "Đã hủy đơn đăng ký thành công",
+    });
+  } catch (error) {
+    console.error("Cancel application error:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };

@@ -1,11 +1,9 @@
-import dns from 'node:dns';
-dns.setServers(['1.1.1.1', '1.0.0.1']);
-
+import dotenv from 'dotenv';
 dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
+import dns from 'node:dns';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import ownerApplicationRoutes from './routes/ownerApplicationRoutes.js';
@@ -13,6 +11,7 @@ import serviceRoutes from './routes/serviceRoutes.js';
 import errorHandler from './middlewares/errorHandler.js';
 import ApiError from './utils/ApiError.js';
 
+dns.setServers(['1.1.1.1', '1.0.0.1']);
 const app = express();
 
 // Middleware
